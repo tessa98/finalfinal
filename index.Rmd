@@ -3,14 +3,14 @@ title: "woman in music"
 output: 
   flexdashboard::flex_dashboard:
     storyboard: true
-    
-    
-  
+    social: menu
+    source: embed
 ---
 
 ```{r setup, include=FALSE}
 
 library(tidyverse)
+library(shiny)
 library(tidymodels)
 library(ggdendro)
 library(protoclust)
@@ -19,7 +19,10 @@ library(heatmaply)
 library(spotifyr)
 library(compmus)
 
+
+
 ```
+
 
 
 Woman in music
@@ -28,6 +31,14 @@ Woman in music
 ### Presentation
 
 
+What makes one song more popular? What makes one song so popular with so many people? Could the definitive formula be found for all the songs we want to write to be successful? 
+
+This is the object of research that I would like to propose. But I didn't want to stay just at that point, I'd like to go a little further. 
+
+Because in the last installment of the grammies something caught my attention, they did an interview with a woman music producer and she claimed that only about 3% of the workers in the music industry are women and she will want to claim this. And although we are currently trying to show that the situation of women has improved in this "world" when you try to investigate a little more you realize that it really is not so. 
+
+So I decided that the topic I would investigate would be the most listened to women today. 
+
 My research is based on a principle of researching the playlists of the most listened to women in 2016,2017 and 2018. This would serve to determine which style of music could be the most listened to with female singers. 
 
 Once analyzed the 3 lists we can say that the most listened to are: **Beyoncé's** *7/11* in 2016, **Selena Gomez**'s *Wolves* in 2017 and finally in 2018, the most listened to song was **Lady Gaga's** *Shallow* from the movie "a star has born", although this one is exactly in the same points as Ellie Goulding's Close To Me, and I chose Shallow because, in my opinion, it made much more impact than this second song. 
@@ -35,6 +46,7 @@ Once analyzed the 3 lists we can say that the most listened to are: **Beyoncé's
 After having these three songs, I'd like to compare them so that I can see how the most listened to women of the last 3 years have evolved to see if they follow any pattern or if it's just a coincidence that these are the 3 most listened to. 
 
 *Keep in mind that the order of all graphics if they are individual will be: 2016, 2017 and 2018. And if they are comparative it will be 2016 vs 2017, 2017 vs 2018 and if there is a third it will be 2016 vs 2018.* 
+
 
 -----------------------------------------------------------------------
 
@@ -54,18 +66,6 @@ shallow  <-
     select(segments) %>% unnest(segments) %>% 
     select(start, duration, pitches)
 
-wolves %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
-    compmus_gather_chroma %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    theme_minimal()
 beyonce %>% 
     mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
     compmus_gather_chroma %>% 
@@ -78,6 +78,20 @@ beyonce %>%
     geom_tile() +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     theme_minimal()
+
+wolves %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    theme_minimal()
+
 shallow %>% 
     mutate(pitches = map(pitches, compmus_normalise, 'euclidean')) %>% 
     compmus_gather_chroma %>% 
@@ -96,7 +110,7 @@ shallow %>%
 ```
 
 ***
-Here we can see the pitch graphics of Wolves, 7/11 and Shallow respectively. As we can see, the first and second have something in common, but the third already deviates from the other ones.  
+Here we can see the pitch graphics of 7/11, Wolves and Shallow respectively. As we can see, the first and second have something in common, but the third already deviates from the other ones.  
 
 
 
@@ -138,7 +152,7 @@ compmus_long_distance(
 
 compmus_long_distance(
     shallow %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
-    beyonce %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
+    wolves %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
     feature = pitches,
     method = 'euclidean') %>% 
     ggplot(
@@ -150,11 +164,11 @@ compmus_long_distance(
             fill = d)) + 
     geom_tile() +
     scale_fill_continuous(type = 'viridis', guide = 'none') +
-    labs(x = 'Shallow by Lady Gaga', y = '7/11 by Beyoncé') +
+    labs(x = 'Shallow by Lady Gaga', y = 'Wolves by Selena Gomez') +
     theme_minimal()
 
 compmus_long_distance(
-    wolves %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
+    beyonce %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
     shallow %>% mutate(pitches = map(pitches, compmus_normalise, 'chebyshev')),
     feature = pitches,
     method = 'euclidean') %>% 
@@ -167,13 +181,13 @@ compmus_long_distance(
             fill = d)) + 
     geom_tile() +
     scale_fill_continuous(type = 'viridis', guide = 'none') +
-    labs(x = 'Wolves by Selena Gomez', y = 'Shallow by Lady Gaga') +
+    labs(x = '7/11 by Beyoncé', y = 'Shallow by Lady Gaga') +
     theme_minimal()
 
 ```
 
 ***
-Here we can observe the comparison of the time warping between the three songs.  Clearly the 2016 cation and the 2018 cation have more in common than the 2017 song with any of the others. 
+Here we can observe the comparison of the time warping between the three songs.  Clearly the 2017 song and the 2018 song have more in common than the 2016 song with any of the others. Really the information that this section gives us could be easily deductible if we listen to the 3 songs because we can observe that although **wolves** is an electronic nation does not leave behind a structure similar to **shallow** by  *Lady Gaga*, however, Beyoncé has nothing to do with it.  
 
 
 
@@ -225,6 +239,18 @@ shalloww <-
 
 
 
+beyoncee %>% 
+    compmus_gather_timbre %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = basis, 
+            fill = value)) + 
+    geom_tile() +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    scale_fill_viridis_c(option = 'E') +
+    theme_classic()
 
 wolvees %>%
     compmus_gather_timbre %>% 
@@ -238,18 +264,7 @@ wolvees %>%
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     scale_fill_viridis_c(option = 'E') +
     theme_classic()
-beyoncee %>% 
-    compmus_gather_timbre %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = basis, 
-            fill = value)) + 
-    geom_tile() +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    scale_fill_viridis_c(option = 'E') +
-    theme_classic()
+
 shalloww %>% 
     compmus_gather_timbre %>% 
     ggplot(
@@ -267,11 +282,27 @@ shalloww %>%
 
 
 *** 
-observing now the ceptograms, we can observe that again, the songs of 2016- 2017 have some similarity, but that nevertheless the 2018 returns to break with the norm that they are similar. 
+Looking now the ceptograms, we can observe that again,  the songs of 2017- 2018 have some similarity, but that nevertheless the 2016 returns to break with the norm that they are similar. However, one thing we can see is that they are all within more or less the same range, there is no exaggeration and although Wolves and Shallow are more alike 7/11 is not out of the frame at all. 
+
 
 ### comparation 
 
 ```{r}
+
+beyoncee %>% 
+    compmus_self_similarity(timbre, 'cosine') %>% 
+    ggplot(
+        aes(
+            x = xstart + xduration / 2, 
+            width = xduration,
+            y = ystart + yduration / 2,
+            height = yduration,
+            fill = d)) + 
+    geom_tile() +
+    coord_fixed() +
+    scale_fill_viridis_c(option = 'E', guide = 'none') +
+    theme_classic() +
+    labs(x = '', y = '')
 
 wolvees %>% 
     compmus_self_similarity(timbre, 'cosine') %>% 
@@ -287,20 +318,7 @@ wolvees %>%
     scale_fill_viridis_c(option = 'E', guide = 'none') +
     theme_classic() +
     labs(x = '', y = '') 
-beyoncee %>% 
-    compmus_self_similarity(timbre, 'cosine') %>% 
-    ggplot(
-        aes(
-            x = xstart + xduration / 2, 
-            width = xduration,
-            y = ystart + yduration / 2,
-            height = yduration,
-            fill = d)) + 
-    geom_tile() +
-    coord_fixed() +
-    scale_fill_viridis_c(option = 'E', guide = 'none') +
-    theme_classic() +
-    labs(x = '', y = '')
+
 shalloww %>% 
     compmus_self_similarity(timbre, 'cosine') %>% 
     ggplot(
@@ -320,7 +338,7 @@ shalloww %>%
 ```
 
 ***
-However, we see that with respect to the structure of this analysis, Shallow looks more like Wolves than 7/11
+However, we see that with respect to the structure of this analysis, Shallow looks more like Wolves than 7/11. Thanks to the fact that we already know that Wolves and Shallow have a similar structure, we are not surprised that they are the most similar graphics. Are we perhaps dealing with a possible formula? Because although Beyoncé's is different these two songs are fulfilling a kind of pattern. 
 
 
 
@@ -406,7 +424,8 @@ womanunoytres %>%
 ```
 
 *** 
-What do the most listened to songs sung by women in 2016 and 2018 have in common? As we can see in 2018 there was a more general tendency to music with a much more developed tempo (btw). And a much higher timbre in general. While 2016 resulted in a year in which the music was "quieter" and with a lower timbre. 
+In this case we will not only analyse the most listened to songs of each year, but we will also add the top of songs that Spotify made each year.  
+The ratio of the tempo between 2016 and 2018 is more equal than in 2017, we see the beginning of the trend. And at the same time the timbre is also much more equal than the previous year. Were we suffering an evolution towards the music of 2018? And contrary to what we would have deduced from the previous data, the music of 2016 is more similar to 2018 than that of 2016, will it be that everything analyzed above is only good for the most famous song of each year and that all the others are more similar to those of 2017? 
 
 ### 2017 vs 2018
 ```{r}
@@ -486,8 +505,9 @@ womandosytres %>%
 ```
 
 ***
-The ratio of the tempo between 2017 and 2018 is more equal than in 2016, we see the beginning of the trend. And at the same time the timbre is also much more equal than the previous year. Were we suffering an evolution towards the music of 2018? 
 
+In this case we will not only analyse the most listened to songs of each year, but we will also add the top of songs that Spotify made each year.  
+What do the most listened to songs sung by women in 2017 and 2018 have in common? As we can see in 2018 there was a more general tendency to music with a much more developed tempo (btw). And a much higher timbre in general. While 2017 resulted in a year in which the music was "quieter" and with a lower timbre. Thanks to all the previous coincidences we could deduce that this table could be quite similar, nevertheless, the method of deduction does not work in this occasion and although we did not deviate too much, we did not manage to find so much similarity.
 
 
 ###Prediction vs. Truth
@@ -600,32 +620,7 @@ beyooonce <-
     get_tidy_audio_analysis('02M6vucOvmRfMxTXDUwRXu') %>% 
     select(segments) %>% unnest(segments) 
 
-wooolves %>% 
-    mutate(loudness_max_time = start + loudness_max_time) %>% 
-    arrange(loudness_max_time) %>% 
-    mutate(delta_loudness = loudness_max - lag(loudness_max)) %>% 
-    ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-    geom_line() +
-    xlim(0, 30) +
-    theme_minimal() +
-    labs(x = 'Time (s)', y = 'Novelty')
 
-wooolves %>% 
-    mutate(pitches = map(pitches, compmus_normalise, 'clr')) %>% 
-    arrange(start) %>% 
-    mutate(pitches = map2(pitches, lag(pitches), `-`)) %>% 
-    compmus_gather_chroma %>% 
-    ggplot(
-        aes(
-            x = start + duration / 2, 
-            width = duration, 
-            y = pitch_class, 
-            fill = pmax(0, value))) + 
-    geom_tile() +
-    scale_fill_viridis_c(option = 'E', guide = 'none') +
-    xlim(0, 30) +
-    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
-    theme_classic()
 
 
 beyooonce %>% 
@@ -654,6 +649,36 @@ beyooonce %>%
     xlim(0, 30) +
     labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
     theme_classic()
+
+wooolves %>% 
+    mutate(loudness_max_time = start + loudness_max_time) %>% 
+    arrange(loudness_max_time) %>% 
+    mutate(delta_loudness = loudness_max - lag(loudness_max)) %>% 
+    ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+    geom_line() +
+    xlim(0, 30) +
+    theme_minimal() +
+    labs(x = 'Time (s)', y = 'Novelty')
+
+wooolves %>% 
+    mutate(pitches = map(pitches, compmus_normalise, 'clr')) %>% 
+    arrange(start) %>% 
+    mutate(pitches = map2(pitches, lag(pitches), `-`)) %>% 
+    compmus_gather_chroma %>% 
+    ggplot(
+        aes(
+            x = start + duration / 2, 
+            width = duration, 
+            y = pitch_class, 
+            fill = pmax(0, value))) + 
+    geom_tile() +
+    scale_fill_viridis_c(option = 'E', guide = 'none') +
+    xlim(0, 30) +
+    labs(x = 'Time (s)', y = NULL, fill = 'Magnitude') +
+    theme_classic()
+
+
+
 
 
 shalooow %>% 
@@ -690,7 +715,7 @@ shalooow %>%
 
 
 ***
-Here what we can observe is that there is a similarity between *wolves*, which represent the first two graphs, and *7/11* of Beyoncé which are the next two, however the *shallow* song of 2018 breaks a small pattern that we could have found. 
+Here what we can observe is that there is a similarity between *7/11*, which represent the first two graphs, and *Wolves*  which are the next two, however the *shallow* song of 2018 breaks a small pattern that we could have found. 
 
 
 
@@ -764,7 +789,7 @@ hclust(woman3_dist, method = 'single') %>% dendro_data %>% ggdendrogram
 
 
 ***
-Here I decided to use the analysis to finally know if there is any pattern between the top 3 songs of each year. Could we get to some classification? 
+As we have seen, analyzing only the most famous of each year can lead to confusion, so I decided to make a heading with the top 3 of each year, to see if it might be possible to come to some conclusion. Being the top of 2018: **Shallow**, **I like it** and **Let You Love Me** Those of 2017:  **Hello**, **I got you** and **7/11** respectively and finally those of 2016: **Meant to be**, *New Rules** and **Wolves** , presented from the third most listened to to the most.  Could we get to some classification?  
 
 
 
